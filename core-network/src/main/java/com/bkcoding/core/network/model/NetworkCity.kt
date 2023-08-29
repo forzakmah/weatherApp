@@ -6,5 +6,7 @@ import kotlinx.serialization.Serializable
 data class NetworkCity(
     val name: String,
     val lat: Double,
-    val long: Double
+    val lon: Double,
+    val state: String,
+    val country: String
 )

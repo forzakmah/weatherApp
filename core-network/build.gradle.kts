@@ -17,9 +17,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_URL", "\"https://api.openweathermap.org/\"")
+            buildConfigField("String", "OPEN_WEATHER_API_KEY", "\"448ed252229f93416a472311ec8b91ee\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            buildConfigField("String", "BASE_URL", "\"https://api.openweathermap.org/\"")
+            buildConfigField("String", "OPEN_WEATHER_API_KEY", "\"8bce0772b524aff74fcc6768c9488830\"")
         }
     }
     compileOptions {
@@ -29,11 +35,15 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
     implementation(libs.okHttp)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.okhttp.logging)
     implementation(libs.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
