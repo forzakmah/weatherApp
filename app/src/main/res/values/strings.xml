@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Weather app</string>
+    <string name="title_city_screen">Weather</string>
+    <string name="placeholder_search_field">"Search for a city"</string>
+    <string name="cancel_text">Cancel</string>
+    <string name="text_indicator_when_no_cities"> Please, start adding the cities that
+        you want using the above search bar</string>
+    <string name="no_results_found">No results found for %s</string>
+    <string name="no_results">No results</string>
 </resources>
