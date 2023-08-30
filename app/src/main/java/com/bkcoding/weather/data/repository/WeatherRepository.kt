@@ -20,7 +20,11 @@ interface IWeatherRepository {
     suspend fun addCity(entity: CityEntity)
     fun fetchCities(): Flow<List<City>>
 
-    suspend fun weatherByCity(query: String): NetworkResult<WeatherInfoNetwork>
+    suspend fun weatherByCity(
+        query: String,
+        lat: Double,
+        lon: Double
+    ): NetworkResult<WeatherInfoNetwork>
 }
 
 class WeatherRepository(
@@ -54,8 +58,14 @@ class WeatherRepository(
     }
 
     override suspend fun weatherByCity(
-        query: String
+        query: String,
+        lat: Double,
+        lon: Double
     ): NetworkResult<WeatherInfoNetwork> {
-        return api.fetchWeather(query = query)
+        return api.fetchWeather(
+            query = query,
+            lat = lat,
+            lon = lon
+        )
     }
 }

@@ -8,7 +8,9 @@ import com.bkcoding.core.network.model.WeatherInfoNetwork
 
 interface WeatherAppApi {
     suspend fun fetchWeather(
-        query: String
+        query: String,
+        lat: Double,
+        lon: Double,
     ): NetworkResult<WeatherInfoNetwork>
 
     suspend fun searchCity(
@@ -20,10 +22,16 @@ interface WeatherAppApi {
 class WeatherApiImpl : WeatherAppApi {
     private val httpClient = HttpClient.shared
 
-    override suspend fun fetchWeather(query: String): NetworkResult<WeatherInfoNetwork> {
+    override suspend fun fetchWeather(
+        query: String,
+        lat: Double,
+        lon: Double
+    ): NetworkResult<WeatherInfoNetwork> {
         return httpClient.get<WeatherInfoNetwork>(
             url = ApiHelper.weatherInfoEndpoint(
-                query = query
+                query = query,
+                lat = lat,
+                lon = lon
             )
         )
     }
@@ -50,6 +58,8 @@ object ApiHelper {
 
     fun weatherInfoEndpoint(
         query: String,
+        lat: Double,
+        lon: Double,
         units: String = "metric"
-    ) = "${baseUrl}data/2.5/weather?q=$query&units=$units"
+    ) = "${baseUrl}data/2.5/weather?q=$query&lat=$lat&lon=$lon&units=$units"
 }

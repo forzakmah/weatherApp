@@ -42,7 +42,10 @@ import com.bkcoding.weather.R
 import com.bkcoding.weather.data.model.City
 
 @Composable
-fun CityScreen(viewModel: CityViewModel) {
+fun CityScreen(
+    viewModel: CityViewModel,
+    didClick: (City) -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -104,12 +107,15 @@ fun CityScreen(viewModel: CityViewModel) {
                     )
                 }
             } else {
-                cities.forEach {
-                    item(key = it.name) {
+                cities.forEach { city ->
+                    item(key = city.name) {
                         Card(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .clickable {
+                                    didClick.invoke(city)
+                                },
                             shape = RoundedCornerShape(25.dp)
                         ) {
                             Row(
@@ -121,7 +127,7 @@ fun CityScreen(viewModel: CityViewModel) {
                                 horizontalArrangement = Arrangement.Start
                             ) {
                                 Text(
-                                    text = "${it.name}, ${it.state}, ${it.country}",
+                                    text = "${city.name}, ${city.state}, ${city.country}",
                                     fontWeight = FontWeight.W700,
                                     fontSize = 16.sp
                                 )

@@ -16,6 +16,7 @@ material3 = "1.2.0-alpha06"
 room = "2.5.2"
 coroutines = "1.7.1"
 material-icons = "1.6.0-alpha04"
+navigation-compose = "2.6.0"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -44,6 +45,8 @@ coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutin
 coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "material-icons"}
 material-icons-core = { group = "androidx.compose.material", name = "material-icons-core", version.ref = "material-icons" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

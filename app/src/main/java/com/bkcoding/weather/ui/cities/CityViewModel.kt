@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.bkcoding.core.network.httpclient.NetworkResult
 import com.bkcoding.core.network.weatherApi.WeatherApiImpl
@@ -13,6 +14,7 @@ import com.bkcoding.weather.data.model.asEntity
 import com.bkcoding.weather.data.model.asExternalModel
 import com.bkcoding.weather.data.repository.WeatherRepository
 import com.bkcoding.weather.db.entity.CityEntity
+import com.bkcoding.weather.ui.weather.WeatherViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,6 +82,20 @@ class CityViewModel(
             weatherRepository.addCity(
                 entity = city.asEntity()
             )
+        }
+    }
+
+    /**
+     * Factory for [CityViewModel] that takes WeatherRepository as a dependency
+     */
+    companion object {
+        fun provideFactory(
+            weatherRepository: WeatherRepository
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return CityViewModel(weatherRepository = weatherRepository) as T
+            }
         }
     }
 }
