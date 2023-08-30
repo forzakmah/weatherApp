@@ -7,4 +7,20 @@
         you want using the above search bar</string>
     <string name="no_results_found">No results found for %s</string>
     <string name="no_results">No results</string>
+
+    <string name="label_feels_like">Feels like</string>
+    <string name="label_humidity">Humidity</string>
+    <string name="label_visibility">Visibility</string>
+    <string name="label_pressure">Pressure</string>
+    <string name="label_wind">Wind</string>
+    <string name="label_clouds">Clouds</string>
+
+    <string name="label_highest_lowest_temp">H:%d%s L:%d%s</string>
+
+    <string name="label_sunrise">☀️ sunrise</string>
+    <string name="label_sunset">🌅 Sunset</string>
+
+    <string name="something_goes_wrong">An error has occurred, please try again later.</string>
+
+    <string name="retry_label_btn">Try again</string>
 </resources>

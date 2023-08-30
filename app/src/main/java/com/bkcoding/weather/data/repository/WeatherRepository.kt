@@ -1,6 +1,7 @@
 package com.bkcoding.weather.data.repository
 
 import com.bkcoding.core.network.httpclient.NetworkResult
+import com.bkcoding.core.network.model.WeatherInfoNetwork
 import com.bkcoding.core.network.weatherApi.WeatherAppApi
 import com.bkcoding.weather.data.model.City
 import com.bkcoding.weather.data.model.asExternalModel
@@ -18,6 +19,8 @@ interface IWeatherRepository {
 
     suspend fun addCity(entity: CityEntity)
     fun fetchCities(): Flow<List<City>>
+
+    suspend fun weatherByCity(query: String): NetworkResult<WeatherInfoNetwork>
 }
 
 class WeatherRepository(
@@ -48,5 +51,11 @@ class WeatherRepository(
                 city.asExternalModel()
             }
         }
+    }
+
+    override suspend fun weatherByCity(
+        query: String
+    ): NetworkResult<WeatherInfoNetwork> {
+        return api.fetchWeather(query = query)
     }
 }

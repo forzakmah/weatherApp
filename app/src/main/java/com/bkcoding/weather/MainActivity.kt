@@ -7,6 +7,8 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -16,6 +18,7 @@ import com.bkcoding.weather.ui.cities.CityScreen
 import com.bkcoding.weather.ui.cities.CityViewModel
 import com.bkcoding.weather.ui.theme.WeatherAppTheme
 import com.bkcoding.weather.ui.weather.WeatherScreen
+import com.bkcoding.weather.ui.weather.WeatherViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -41,14 +44,29 @@ class MainActivity : ComponentActivity() {
             }
         )
 
+        val anotherOne by viewModels<WeatherViewModel>(
+            factoryProducer = {
+                object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                        return WeatherViewModel(weatherRepository = repository) as T
+                    }
+                }
+            }
+        )
+
         setContent {
-            WeatherAppTheme {
+            WeatherAppTheme(darkTheme = true) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    CityScreen(
-                        viewModel = viewModel
+                    val state by anotherOne.weatherState.collectAsState()
+                    //CityScreen(
+                    //    viewModel = viewModel
+                    //)
+                    WeatherScreen(
+                        weatherState = state,
+                        retry = anotherOne::fetchWeather
                     )
                 }
             }
