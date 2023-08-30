@@ -4,9 +4,10 @@ import com.bkcoding.core.network.httpclient.NetworkResult
 import com.bkcoding.core.network.model.WeatherInfoNetwork
 import com.bkcoding.core.network.weatherApi.WeatherAppApi
 import com.bkcoding.weather.data.model.City
+import com.bkcoding.weather.data.model.WeatherInfoModel
 import com.bkcoding.weather.data.model.asExternalModel
-import com.bkcoding.weather.db.dao.CityDao
-import com.bkcoding.weather.db.entity.CityEntity
+import com.bkcoding.weather.db.dao.WeatherInfoDao
+import com.bkcoding.weather.db.entity.WeatherInfoEntity
 import com.bkcoding.weather.utils.suspendRunCatching
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -17,18 +18,23 @@ interface IWeatherRepository {
         limit: Int = 5,
     ): Result<List<City>>
 
-    suspend fun addCity(entity: CityEntity)
-    fun fetchCities(): Flow<List<City>>
-
     suspend fun weatherByCity(
         query: String,
         lat: Double,
         lon: Double
     ): NetworkResult<WeatherInfoNetwork>
+
+    suspend fun saveWeatherInfo(
+        weatherInfoEntity: WeatherInfoEntity
+    )
+
+    fun fetchWeathersInfo(): Flow<List<WeatherInfoModel>>
+
+    fun fetchWeatherInfo(id: Long): Flow<WeatherInfoModel>
 }
 
 class WeatherRepository(
-    private val cityDao: CityDao,
+    private val weatherInfoDao: WeatherInfoDao,
     private val api: WeatherAppApi
 ) : IWeatherRepository {
     override suspend fun searchCity(
@@ -45,18 +51,6 @@ class WeatherRepository(
         }
     }
 
-    override suspend fun addCity(entity: CityEntity) {
-        cityDao.insertAll(entity)
-    }
-
-    override fun fetchCities(): Flow<List<City>> {
-        return cityDao.getAllCities().map { flow ->
-            flow.map { city ->
-                city.asExternalModel()
-            }
-        }
-    }
-
     override suspend fun weatherByCity(
         query: String,
         lat: Double,
@@ -67,5 +61,23 @@ class WeatherRepository(
             lat = lat,
             lon = lon
         )
+    }
+
+    override suspend fun saveWeatherInfo(
+        weatherInfoEntity: WeatherInfoEntity
+    ) {
+        weatherInfoDao.insert(weatherInfoEntity)
+    }
+
+    override fun fetchWeathersInfo(): Flow<List<WeatherInfoModel>> {
+        return weatherInfoDao.getAllWeathers().map { flow ->
+            flow.map { weather ->
+                weather.asExternalModel()
+            }
+        }
+    }
+
+    override fun fetchWeatherInfo(id: Long): Flow<WeatherInfoModel> {
+        return weatherInfoDao.weatherById(id = id).map { it.asExternalModel() }
     }
 }

@@ -23,4 +23,6 @@
     <string name="something_goes_wrong">An error has occurred, please try again later.</string>
 
     <string name="retry_label_btn">Try again</string>
+
+    <string name="label_latest_update">Latest update %s</string>
 </resources>

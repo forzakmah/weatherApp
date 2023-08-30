@@ -41,7 +41,6 @@ data class WeatherCloudInfoNetwork(
     val all: Int
 )
 
-
 @Serializable
 data class WeatherCountryInfoNetwork(
     val type: Int,
@@ -50,7 +49,6 @@ data class WeatherCountryInfoNetwork(
     val sunrise: Long,
     val sunset: Long
 )
-
 
 @Serializable
 data class WeatherInfoNetwork(

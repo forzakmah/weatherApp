@@ -9,7 +9,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.bkcoding.weather.data.WeatherContainer
 import com.bkcoding.weather.ui.cities.CityScreen
 import com.bkcoding.weather.ui.weather.WeatherScreen
 import com.bkcoding.weather.ui.weather.WeatherViewModel
@@ -25,8 +24,9 @@ object Routing {
      */
     const val latitudeArg = "latitudeArg"
     const val longitudeArg = "longitudeArg"
-    const val queryArg = "queryArg"
-    const val weatherScreen = "weatherScreen/{$queryArg}/{$latitudeArg}/{$longitudeArg}"
+    const val cityNameArg = "cityNameArg"
+    const val cityIdArg = "cityIdArg"
+    const val weatherScreen = "weatherScreen/{$cityIdArg}/{$cityNameArg}/{$latitudeArg}/{$longitudeArg}"
 }
 
 /**
@@ -65,7 +65,8 @@ fun WeatherNavigationApp(
                      */
                     navController.navigate(
                         Routing.weatherScreen
-                            .replace("{${Routing.queryArg}}", city.name)
+                            .replace("{${Routing.cityIdArg}}", city.id.toString())
+                            .replace("{${Routing.cityNameArg}}", city.cityName)
                             .replace("{${Routing.latitudeArg}}", city.lat.toString())
                             .replace("{${Routing.longitudeArg}}", city.lon.toString())
                     )
@@ -80,6 +81,16 @@ fun WeatherNavigationApp(
             route = Routing.weatherScreen,
             arguments = listOf(
                 navArgument(
+                    name = Routing.cityIdArg
+                ) {
+                    type = NavType.LongType
+                },
+                navArgument(
+                    name = Routing.cityNameArg
+                ) {
+                    type = NavType.StringType
+                },
+                navArgument(
                     name = Routing.latitudeArg
                 ) {
                     type = NavType.FloatType
@@ -92,7 +103,8 @@ fun WeatherNavigationApp(
             )
         ) { backStackEntry ->
 
-            val query = backStackEntry.arguments?.getString(Routing.queryArg) ?: ""
+            val cityId = backStackEntry.arguments?.getLong(Routing.cityIdArg) ?: 0
+            val cityName = backStackEntry.arguments?.getString(Routing.cityNameArg) ?: ""
             val latitude = backStackEntry.arguments?.getFloat(Routing.latitudeArg) ?: 0.0
             val longitude = backStackEntry.arguments?.getFloat(Routing.longitudeArg) ?: 0.0
 
@@ -102,9 +114,10 @@ fun WeatherNavigationApp(
             val weatherViewModel: WeatherViewModel = viewModel(
                 factory = WeatherViewModel.provideFactory(
                     weatherRepository = weatherContainer.weatherRepository,
-                    query = query,
-                    lat = latitude.toDouble(),
-                    lon = longitude.toDouble()
+                    weatherId = cityId,
+                    cityName = cityName,
+                    latitude = latitude.toDouble(),
+                    longitude = longitude.toDouble()
                 )
             )
 

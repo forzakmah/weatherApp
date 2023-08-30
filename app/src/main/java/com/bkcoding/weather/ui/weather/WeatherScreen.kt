@@ -46,7 +46,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bkcoding.core.network.model.WeatherInfoNetwork
 import com.bkcoding.weather.R
+import com.bkcoding.weather.data.model.WeatherInfoModel
 import com.bkcoding.weather.utils.WeatherCircularProgressBar
+import com.bkcoding.weather.utils.formatTo
 import com.bkcoding.weather.utils.toTime
 import kotlin.math.roundToInt
 
@@ -169,16 +171,16 @@ enum class WeatherIcon(
     }
 }
 
-private fun extractWeatherMetrics(weatherInfo: WeatherInfoNetwork): List<Triple<Int, String, Metric>> {
+private fun extractWeatherMetrics(weatherInfo: WeatherInfoModel): List<Triple<Int, String, Metric>> {
     return listOf(
         Triple(
             first = R.string.label_feels_like,
-            second = "${weatherInfo.main.feelsLike.roundToInt()}",
+            second = "${weatherInfo.feelsLike.roundToInt()}",
             third = Metric(measure = Measure.CELSIUS, icon = MetricIcons.temperature)
         ),
         Triple(
             first = R.string.label_humidity,
-            second = "${weatherInfo.main.humidity}",
+            second = "${weatherInfo.humidity}",
             third = Metric(measure = Measure.PERCENT, icon = MetricIcons.humidity)
         ),
         Triple(
@@ -188,17 +190,17 @@ private fun extractWeatherMetrics(weatherInfo: WeatherInfoNetwork): List<Triple<
         ),
         Triple(
             first = R.string.label_pressure,
-            second = "${weatherInfo.main.pressure / 1000}",
+            second = "${weatherInfo.pressure / 1000}",
             third = Metric(measure = Measure.HECTOPASCAL, icon = MetricIcons.pressure)
         ),
         Triple(
             first = R.string.label_wind,
-            second = "${weatherInfo.wind.speed.roundToInt()}",
+            second = "${weatherInfo.wind.roundToInt()}",
             third = Metric(measure = Measure.KILOMETER, icon = MetricIcons.winds)
         ),
         Triple(
             first = R.string.label_clouds,
-            second = "${weatherInfo.clouds.all}",
+            second = "${weatherInfo.clouds}",
             third = Metric(measure = Measure.PERCENT, icon = MetricIcons.clouds)
         )
     )
@@ -208,19 +210,18 @@ private fun extractWeatherMetrics(weatherInfo: WeatherInfoNetwork): List<Triple<
 fun WeatherScreen(
     viewModel: WeatherViewModel
 ) {
-    val weatherState by viewModel.weatherState.collectAsState()
+    val weatherInfo by viewModel.weatherInfo.collectAsState()
 
-    when (val state = weatherState) {
-        is WeatherState.Loading -> WeatherCircularProgressBar(visible = true)
 
-        is WeatherState.Success -> WeatherScreenBody(weatherInfo = state.weatherInfo)
+    when (val state = weatherInfo) {
+        is WeatherInfoModelState.Loading -> WeatherCircularProgressBar(visible = true)
 
-        is WeatherState.Error -> ErrorWeatherScreen(retry = viewModel::fetchWeather)
+        is WeatherInfoModelState.Success -> WeatherScreenBody(weatherInfo = state.weatherInfoModel)
     }
 }
 
 @Composable
-fun WeatherScreenBody(weatherInfo: WeatherInfoNetwork) {
+fun WeatherScreenBody(weatherInfo: WeatherInfoModel) {
     /**
      * Extract all data that will be displayed
      */
@@ -269,6 +270,30 @@ fun WeatherScreenBody(weatherInfo: WeatherInfoNetwork) {
                     weatherInfo = weatherInfo
                 )
             }
+
+            /**
+             * Latest update indicator
+             */
+            item(
+                span = { GridItemSpan(maxLineSpan) }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        textAlign = TextAlign.Center,
+                        text = String.format(
+                            stringResource(id = R.string.label_latest_update),
+                            weatherInfo.createdAt.time.formatTo()
+                        ),
+                        fontSize = 12.sp
+                    )
+                }
+            }
         }
     )
 }
@@ -312,7 +337,7 @@ fun WeatherCardInfo(
 
 @Composable
 fun HeaderWeatherScreen(
-    weatherInfo: WeatherInfoNetwork,
+    weatherInfo: WeatherInfoModel,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -323,28 +348,26 @@ fun HeaderWeatherScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = weatherInfo.name,
+            text = weatherInfo.cityName,
             fontSize = 50.sp,
             fontWeight = FontWeight.ExtraBold
         )
         Text(
-            text = "${weatherInfo.main.temp.roundToInt()}${Measure.CELSIUS.symbol}",
+            text = "${weatherInfo.temp.roundToInt()}${Measure.CELSIUS.symbol}",
             fontSize = 60.sp,
             fontWeight = FontWeight.ExtraBold
         )
-        if (weatherInfo.weather.isNotEmpty()) {
-            Text(
-                text = weatherInfo.weather.first().description,
-                fontSize = 25.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
-        }
+        Text(
+            text = weatherInfo.description,
+            fontSize = 25.sp,
+            fontWeight = FontWeight.ExtraBold
+        )
         Text(
             text = String.format(
                 stringResource(id = R.string.label_highest_lowest_temp),
-                weatherInfo.main.tempMax.roundToInt(),
+                weatherInfo.tempMax.roundToInt(),
                 Measure.CELSIUS.symbol,
-                weatherInfo.main.tempMin.roundToInt(),
+                weatherInfo.tempMin.roundToInt(),
                 Measure.CELSIUS.symbol,
             ),
             fontSize = 25.sp,
@@ -352,7 +375,7 @@ fun HeaderWeatherScreen(
         )
 
         val weatherIcon = WeatherIcon.find(
-            key = weatherInfo.weather.first().icon
+            key = weatherInfo.icon
         )
         Image(
             modifier = Modifier
@@ -368,7 +391,7 @@ fun HeaderWeatherScreen(
 
 @Composable
 fun FooterWeatherScreen(
-    weatherInfo: WeatherInfoNetwork,
+    weatherInfo: WeatherInfoModel,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -388,7 +411,7 @@ fun FooterWeatherScreen(
                 fontSize = 20.sp
             )
             Text(
-                text = weatherInfo.sys.sunrise.toTime(),
+                text = weatherInfo.sunrise.toTime(),
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 25.sp
             )
@@ -405,7 +428,7 @@ fun FooterWeatherScreen(
                 fontSize = 20.sp
             )
             Text(
-                text = weatherInfo.sys.sunset.toTime(),
+                text = weatherInfo.sunset.toTime(),
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 25.sp
             )

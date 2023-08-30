@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -40,11 +41,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bkcoding.weather.R
 import com.bkcoding.weather.data.model.City
+import com.bkcoding.weather.data.model.WeatherInfoModel
+import com.bkcoding.weather.ui.weather.Measure
+import kotlin.math.roundToInt
 
 @Composable
 fun CityScreen(
     viewModel: CityViewModel,
-    didClick: (City) -> Unit
+    didClick: (WeatherInfoModel) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -78,12 +82,9 @@ fun CityScreen(
             onQueryChange = {
                 viewModel.query = it
             },
-            didConfirm = {
+            didConfirm = { city ->
                 viewModel.query = ""
-                /**
-                 * save city inside the mutable list
-                 */
-                viewModel.addCity(it)
+                viewModel.confirmSavingWeatherInfo(city)
                 viewModel.active = false
             },
             didCancel = {
@@ -108,7 +109,7 @@ fun CityScreen(
                 }
             } else {
                 cities.forEach { city ->
-                    item(key = city.name) {
+                    item(key = city.cityName) {
                         Card(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -119,17 +120,26 @@ fun CityScreen(
                             shape = RoundedCornerShape(25.dp)
                         ) {
                             Row(
-                                modifier = Modifier.padding(
-                                    horizontal = 10.dp,
-                                    vertical = 20.dp
-                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight()
+                                    .padding(
+                                        horizontal = 10.dp,
+                                        vertical = 20.dp
+                                    ),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Start
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = "${city.name}, ${city.state}, ${city.country}",
+                                    text = "${city.cityName}, ${city.country}",
                                     fontWeight = FontWeight.W700,
-                                    fontSize = 16.sp
+                                    fontSize = 20.sp
+                                )
+
+                                Text(
+                                    text = "${city.temp.roundToInt()}${Measure.CELSIUS.symbol}",
+                                    fontWeight = FontWeight.W700,
+                                    fontSize = 30.sp
                                 )
                             }
                         }

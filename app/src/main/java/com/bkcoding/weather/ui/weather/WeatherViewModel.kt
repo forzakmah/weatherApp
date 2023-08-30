@@ -5,39 +5,63 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.bkcoding.core.network.httpclient.NetworkResult
 import com.bkcoding.core.network.model.WeatherInfoNetwork
+import com.bkcoding.weather.data.model.WeatherInfoModel
+import com.bkcoding.weather.data.model.asEntity
 import com.bkcoding.weather.data.repository.WeatherRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class WeatherViewModel(
     private val weatherRepository: WeatherRepository,
-    private val query: String,
-    private val lat: Double,
-    private val lon: Double,
+    private val weatherId: Long,
+    private val cityName: String,
+    private val latitude: Double,
+    private val longitude: Double
 ) : ViewModel() {
-    private val _weatherState = MutableStateFlow<WeatherState>(WeatherState.Loading)
-    val weatherState = _weatherState.asStateFlow()
+
+    /**
+     * Flow that contains Weather info saved locally
+     */
+    val weatherInfo: StateFlow<WeatherInfoModelState> =
+        weatherRepository.fetchWeatherInfo(id = weatherId)
+            .map { WeatherInfoModelState.Success(it) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = WeatherInfoModelState.Loading
+            )
 
     init {
+        /**
+         * Fetch the latest weather info and metrics for the network
+         */
         fetchWeather()
     }
 
-    fun fetchWeather() {
+    private fun fetchWeather() {
         viewModelScope.launch(Dispatchers.IO) {
-            _weatherState.value = WeatherState.Loading
             when (
                 val response = weatherRepository.weatherByCity(
-                    query = query,
-                    lat = lat,
-                    lon = lon
+                    query = cityName,
+                    lat = latitude,
+                    lon = longitude
                 )
             ) {
-                is NetworkResult.Success -> _weatherState.value = WeatherState.Success(response.data)
-                is NetworkResult.Error -> _weatherState.value = WeatherState.Error(response.message, response.code)
-                is NetworkResult.Exception -> _weatherState.value = WeatherState.Error("message", 10)
+                is NetworkResult.Success -> saveWeatherInfo(weatherInfoNetwork = response.data)
+                else -> Unit
             }
+        }
+    }
+
+    private fun saveWeatherInfo(weatherInfoNetwork: WeatherInfoNetwork) {
+        viewModelScope.launch(Dispatchers.IO) {
+            weatherRepository.saveWeatherInfo(
+                weatherInfoEntity = weatherInfoNetwork.asEntity()
+            )
         }
     }
 
@@ -47,29 +71,29 @@ class WeatherViewModel(
     companion object {
         fun provideFactory(
             weatherRepository: WeatherRepository,
-            query: String,
-            lat: Double,
-            lon: Double,
+            weatherId: Long,
+            cityName: String,
+            latitude: Double,
+            longitude: Double,
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return WeatherViewModel(
                     weatherRepository = weatherRepository,
-                    query = query,
-                    lat = lat,
-                    lon = lon
+                    weatherId = weatherId,
+                    cityName = cityName,
+                    latitude = latitude,
+                    longitude = longitude
                 ) as T
             }
         }
     }
 }
 
-sealed interface WeatherState {
-    object Loading : WeatherState
-    data class Error(
-        val message: String? = null,
-        val code: Int
-    ) : WeatherState
+sealed interface WeatherInfoModelState {
+    object Loading : WeatherInfoModelState
 
-    data class Success(val weatherInfo: WeatherInfoNetwork) : WeatherState
+    data class Success(
+        val weatherInfoModel: WeatherInfoModel
+    ) : WeatherInfoModelState
 }

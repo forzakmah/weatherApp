@@ -1,8 +1,6 @@
 package com.bkcoding.weather
 
 import android.app.Application
-import com.bkcoding.weather.data.WeatherContainer
-import com.bkcoding.weather.data.WeatherContainerImpl
 import com.bkcoding.weather.db.AppDatabase
 
 class WeatherApplication : Application() {

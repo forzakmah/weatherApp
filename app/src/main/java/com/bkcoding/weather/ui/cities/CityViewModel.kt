@@ -13,8 +13,7 @@ import com.bkcoding.weather.data.model.City
 import com.bkcoding.weather.data.model.asEntity
 import com.bkcoding.weather.data.model.asExternalModel
 import com.bkcoding.weather.data.repository.WeatherRepository
-import com.bkcoding.weather.db.entity.CityEntity
-import com.bkcoding.weather.ui.weather.WeatherViewModel
+import com.bkcoding.weather.db.entity.WeatherInfoEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +33,7 @@ class CityViewModel(
 
     var active by mutableStateOf(false)
 
-    val savedCities = weatherRepository.fetchCities()
+    val savedCities = weatherRepository.fetchWeathersInfo()
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(),
@@ -51,11 +50,10 @@ class CityViewModel(
                 when (val response = api.searchCity(query = query)) {
                     is NetworkResult.Error -> suggestedCity.value = SuggestedCity.Error(Exception())
 
-                    is NetworkResult.Exception -> {
+                    is NetworkResult.Exception ->
                         suggestedCity.value = SuggestedCity.Error(
                             error = response.e
                         )
-                    }
 
                     is NetworkResult.Success -> {
                         suggestedCity.value = SuggestedCity.Success(
@@ -73,15 +71,25 @@ class CityViewModel(
             initialValue = ""
         )
 
-    /**
-     * Save city
-     * @param city [City] City that will be mapped to [CityEntity] an saved in local DB
-     */
-    fun addCity(city: City) {
+    fun confirmSavingWeatherInfo(city: City) {
         viewModelScope.launch(Dispatchers.IO) {
-            weatherRepository.addCity(
-                entity = city.asEntity()
+            val response = weatherRepository.weatherByCity(
+                query = city.name,
+                lat = city.lat,
+                lon = city.lon
             )
+            when (response) {
+                is NetworkResult.Success -> saveWeatherInfo(weatherInfoEntity = response.data.asEntity())
+                else -> Unit
+            }
+        }
+    }
+
+    private fun saveWeatherInfo(
+        weatherInfoEntity: WeatherInfoEntity
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            weatherRepository.saveWeatherInfo(weatherInfoEntity)
         }
     }
 
