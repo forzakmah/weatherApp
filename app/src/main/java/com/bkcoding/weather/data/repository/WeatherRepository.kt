@@ -1,14 +1,13 @@
 package com.bkcoding.weather.data.repository
 
 import com.bkcoding.core.network.httpclient.NetworkResult
+import com.bkcoding.core.network.model.NetworkCity
 import com.bkcoding.core.network.model.WeatherInfoNetwork
 import com.bkcoding.core.network.weatherApi.WeatherAppApi
-import com.bkcoding.weather.data.model.City
 import com.bkcoding.weather.data.model.WeatherInfoModel
 import com.bkcoding.weather.data.model.asExternalModel
 import com.bkcoding.weather.db.dao.WeatherInfoDao
 import com.bkcoding.weather.db.entity.WeatherInfoEntity
-import com.bkcoding.weather.utils.suspendRunCatching
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -16,7 +15,7 @@ interface IWeatherRepository {
     suspend fun searchCity(
         query: String,
         limit: Int = 5,
-    ): Result<List<City>>
+    ): NetworkResult<List<NetworkCity>>
 
     suspend fun weatherByCity(
         query: String,
@@ -37,20 +36,27 @@ class WeatherRepository(
     private val weatherInfoDao: WeatherInfoDao,
     private val api: WeatherAppApi
 ) : IWeatherRepository {
+
+    /**
+     * Search cities from the network using the passed query
+     * @param query [String] city name to search
+     * @param limit [Int] number of items to return in the response
+     * @return [NetworkResult]<[List]<[NetworkCity]>>
+     */
     override suspend fun searchCity(
         query: String,
         limit: Int
-    ): Result<List<City>> {
-        return suspendRunCatching {
-            when (
-                val response = api.searchCity(query = query, limit = limit)
-            ) {
-                is NetworkResult.Success -> response.data.map { it.asExternalModel() }
-                else -> emptyList()
-            }
-        }
+    ): NetworkResult<List<NetworkCity>> {
+        return api.searchCity(query = query, limit = limit)
     }
 
+    /**
+     * Return the network result of weather information of the searched city
+     * @param query [String] city name
+     * @param lat [Double] latitude of the city
+     * @param lon [Double] longitude of the city
+     * @return [NetworkResult]<[WeatherInfoNetwork]>
+     */
     override suspend fun weatherByCity(
         query: String,
         lat: Double,
@@ -63,12 +69,20 @@ class WeatherRepository(
         )
     }
 
+    /**
+     * Save city weather information in the local database
+     * @param weatherInfoEntity [WeatherInfoModel] weather entity to save
+     */
     override suspend fun saveWeatherInfo(
         weatherInfoEntity: WeatherInfoEntity
     ) {
         weatherInfoDao.insert(weatherInfoEntity)
     }
 
+    /**
+     * Return the list of the cities saved inside the database as flow
+     * @return [Flow]<[List]<[WeatherInfoModel]>>
+     */
     override fun fetchWeathersInfo(): Flow<List<WeatherInfoModel>> {
         return weatherInfoDao.getAllWeathers().map { flow ->
             flow.map { weather ->
@@ -77,7 +91,14 @@ class WeatherRepository(
         }
     }
 
-    override fun fetchWeatherInfo(id: Long): Flow<WeatherInfoModel> {
+    /**
+     * Return the city by id
+     * @param id [Long]
+     * @return [Flow]<[WeatherInfoModel]>
+     */
+    override fun fetchWeatherInfo(
+        id: Long
+    ): Flow<WeatherInfoModel> {
         return weatherInfoDao.weatherById(id = id).map { it.asExternalModel() }
     }
 }

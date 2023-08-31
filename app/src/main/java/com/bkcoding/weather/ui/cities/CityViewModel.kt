@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.bkcoding.core.network.httpclient.NetworkResult
-import com.bkcoding.core.network.weatherApi.WeatherApiImpl
 import com.bkcoding.weather.data.model.City
 import com.bkcoding.weather.data.model.asEntity
 import com.bkcoding.weather.data.model.asExternalModel
@@ -26,9 +25,6 @@ import kotlinx.coroutines.launch
 class CityViewModel(
     private val weatherRepository: WeatherRepository
 ) : ViewModel() {
-
-    private val api = WeatherApiImpl()
-
     var query by mutableStateOf("")
 
     var active by mutableStateOf(false)
@@ -46,16 +42,11 @@ class CityViewModel(
     val suggestions = snapshotFlow { query }
         .filter { query.length >= 3 }
         .mapLatest {
-            val ttt = weatherRepository.searchCity(query)
-
             viewModelScope.launch(Dispatchers.IO) {
-                when (val response = api.searchCity(query = query)) {
+                when (val response = weatherRepository.searchCity(query = query)) {
                     is NetworkResult.Error -> suggestedCity.value = SuggestedCity.Error(Exception())
 
-                    is NetworkResult.Exception ->
-                        suggestedCity.value = SuggestedCity.Error(
-                            error = response.e
-                        )
+                    is NetworkResult.Exception -> suggestedCity.value = SuggestedCity.Error(error = response.e)
 
                     is NetworkResult.Success -> {
                         suggestedCity.value = SuggestedCity.Success(
@@ -70,7 +61,7 @@ class CityViewModel(
         .stateIn(
             viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = ""
+            initialValue = null
         )
 
     fun confirmSavingWeatherInfo(city: City) {

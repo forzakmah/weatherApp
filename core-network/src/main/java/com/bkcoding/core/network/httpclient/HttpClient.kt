@@ -1,31 +1,50 @@
 package com.bkcoding.core.network.httpclient
 
+import com.bkcoding.core.network.BuildConfig
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import java.net.HttpURLConnection
 
+/**
+ * sealed class that represent the network result state
+ */
 sealed class NetworkResult<T : Any> {
     class Success<T : Any>(
         val data: T,
         val code: Int = HttpURLConnection.HTTP_OK
     ) : NetworkResult<T>()
 
-    class Error<T : Any>(val code: Int, val message: String?) : NetworkResult<T>()
-    class Exception<T : Any>(val e: Throwable) : NetworkResult<T>()
+    class Error<T : Any>(
+        val code: Int,
+        val message: String?
+    ) : NetworkResult<T>()
+
+    class Exception<T : Any>(
+        val e: Throwable
+    ) : NetworkResult<T>()
 }
 
+/**
+ * basic http client to execute GET request
+ */
 class HttpClient private constructor() {
 
     companion object {
         val shared = HttpClient()
     }
 
+    /**
+     * Okhttp instance with interceptors
+     * to display logs and add the api key before sending requet
+     */
     val client = OkHttpClient.Builder()
         .addInterceptor(
             HttpLoggingInterceptor().apply {
-                setLevel(HttpLoggingInterceptor.Level.BODY)
+                setLevel(
+                    if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+                )
             }
         )
         .addInterceptor(
