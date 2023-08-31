@@ -46,6 +46,8 @@ class CityViewModel(
     val suggestions = snapshotFlow { query }
         .filter { query.length >= 3 }
         .mapLatest {
+            val ttt = weatherRepository.searchCity(query)
+
             viewModelScope.launch(Dispatchers.IO) {
                 when (val response = api.searchCity(query = query)) {
                     is NetworkResult.Error -> suggestedCity.value = SuggestedCity.Error(Exception())

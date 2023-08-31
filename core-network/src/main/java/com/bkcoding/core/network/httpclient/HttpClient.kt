@@ -4,9 +4,14 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
+import java.net.HttpURLConnection
 
 sealed class NetworkResult<T : Any> {
-    class Success<T : Any>(val data: T) : NetworkResult<T>()
+    class Success<T : Any>(
+        val data: T,
+        val code: Int = HttpURLConnection.HTTP_OK
+    ) : NetworkResult<T>()
+
     class Error<T : Any>(val code: Int, val message: String?) : NetworkResult<T>()
     class Exception<T : Any>(val e: Throwable) : NetworkResult<T>()
 }
@@ -45,7 +50,10 @@ class HttpClient private constructor() {
             val code = response.code
             if (response.isSuccessful) {
                 if (body != null)
-                    NetworkResult.Success(data = json.decodeFromString<T>(body.string()))
+                    NetworkResult.Success(
+                        data = json.decodeFromString<T>(body.string()),
+                        code = code
+                    )
                 else
                     NetworkResult.Success(data = "No Content" as T)
             } else {

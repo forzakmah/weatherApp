@@ -38,6 +38,12 @@ android {
     buildFeatures {
         buildConfig = true
     }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -47,5 +53,7 @@ dependencies {
     implementation(libs.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.coroutines.test)
     androidTestImplementation(libs.espresso.core)
+    testImplementation(libs.okhttp.mockwebserver)
 }
