@@ -90,6 +90,7 @@ fun CityScreen(
             didCancel = {
                 viewModel.active = false
                 viewModel.query = ""
+                viewModel.resetSuggestedCities()
             }
         )
 

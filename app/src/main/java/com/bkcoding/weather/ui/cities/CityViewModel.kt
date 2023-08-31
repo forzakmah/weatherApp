@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
@@ -36,7 +37,8 @@ class CityViewModel(
             emptyList()
         )
 
-    val suggestedCity = MutableStateFlow<SuggestedCity>(SuggestedCity.Loading)
+    private val _suggestedCity = MutableStateFlow<SuggestedCity>(SuggestedCity.Loading)
+    val suggestedCity = _suggestedCity.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val suggestions = snapshotFlow { query }
@@ -44,12 +46,12 @@ class CityViewModel(
         .mapLatest {
             viewModelScope.launch(Dispatchers.IO) {
                 when (val response = weatherRepository.searchCity(query = query)) {
-                    is NetworkResult.Error -> suggestedCity.value = SuggestedCity.Error(Exception())
+                    is NetworkResult.Error -> _suggestedCity.value = SuggestedCity.Error(Exception())
 
-                    is NetworkResult.Exception -> suggestedCity.value = SuggestedCity.Error(error = response.e)
+                    is NetworkResult.Exception -> _suggestedCity.value = SuggestedCity.Error(error = response.e)
 
                     is NetworkResult.Success -> {
-                        suggestedCity.value = SuggestedCity.Success(
+                        _suggestedCity.value = SuggestedCity.Success(
                             data = response.data.map {
                                 it.asExternalModel()
                             }
@@ -72,10 +74,26 @@ class CityViewModel(
                 lon = city.lon
             )
             when (response) {
-                is NetworkResult.Success -> saveWeatherInfo(weatherInfoEntity = response.data.asEntity())
+                is NetworkResult.Success -> {
+                    /**
+                     * clear state
+                     */
+                    resetSuggestedCities()
+                    /**
+                     * Save weather info in the DB
+                     */
+                    saveWeatherInfo(
+                        weatherInfoEntity = response.data.asEntity()
+                    )
+                }
+
                 else -> Unit
             }
         }
+    }
+
+    fun resetSuggestedCities() {
+        _suggestedCity.value = SuggestedCity.Loading
     }
 
     private fun saveWeatherInfo(

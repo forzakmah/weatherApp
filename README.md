@@ -1,20 +1,21 @@
 # <b>WeatherApp</b>
 
 A simple android weather app demonstrating Jetpack Compose, Coroutines and Kotlin flow.
-The app support offline mode with the use of [Room](https://developer.android.com/training/data-storage/) for local persistence.
-Data is provided by [OpenWeatherMap API](https://openweathermap.org/api).
+The simple Offers offline mode user experience using Room api for managing local persistence
+and online mode data is provided by [OpenWeatherMap API](https://openweathermap.org/api) public API.
+
+![alt text](https://github.com/forzakmah/weatherApp/blob/main/previews/weather_app.png "Preview")
 
 ## Modules:
 
-<b>app</b> - the main entry point of the application.
-<b>core-network</b> - A basic http client module implemented with [OkHttp3](https://square.github.io/okhttp/).
+<b>app</b>: the main entry point of the application.
+<b>core-network</b>: A basic http client module implemented with [OkHttp3](https://square.github.io/okhttp/).
 
 The core-network module provides 2 main Endpoints.
 * Search city by name
-* fetch weather metrics.
+* Fetch weather metrics.
 
-Dependency injection is handled manually with this
-class [WeatherContainer.kt](https://github.com/forzakmah/weatherApp/blob/main/app/src/main/java/com/bkcoding/weather/WeatherContainer.kt).
+Dependency injection is handled manually with this class [WeatherContainer.kt](https://github.com/forzakmah/weatherApp/blob/main/app/src/main/java/com/bkcoding/weather/WeatherContainer.kt).
 
 ### Libraries
 
