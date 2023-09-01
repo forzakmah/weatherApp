@@ -33,6 +33,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
 
+      - name: Accept Android licenses
+        run: yes | ~/Android/Sdk/tools/bin/sdkmanager --licenses
+
       - name: Build Debug build type
         run: ./gradlew assembleDebug --stacktrace
 
