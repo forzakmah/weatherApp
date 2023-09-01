@@ -62,3 +62,7 @@ class [WeatherContainer.kt](https://github.com/forzakmah/weatherApp/blob/main/ap
 * [material3](https://developer.android.com/jetpack/androidx/releases/compose-material3) Material Design 3 Components.
 * [kotlinx-serialization](https://github.com/Kotlin/kotlinx.serialization) Kotlin serialization consists of a compiler
   plugin, that generates visitor code for serializable classes.
+
+#### Sonar analyse result
+
+![alt text](https://github.com/forzakmah/weatherApp/blob/main/previews/sonar_weather_app.png "Preview")
