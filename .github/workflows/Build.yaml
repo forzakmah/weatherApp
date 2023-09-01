@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macOS-latest
     timeout-minutes: 60
 
     steps:
@@ -34,7 +34,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
 
       - name: Accept Android licenses
-        run: yes | ~/Android/Sdk/tools/bin/sdkmanager --licenses
+        run: yes | "$ANDROID_HOME"/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Build Debug build type
         run: ./gradlew assembleDebug --stacktrace
