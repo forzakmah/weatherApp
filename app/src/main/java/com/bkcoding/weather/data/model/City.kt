@@ -1,6 +1,6 @@
 package com.bkcoding.weather.data.model
 
-import com.bkcoding.core.network.model.NetworkCity
+import com.bkcoding.core.network.model.CityNetwork
 
 data class City(
     val id: Long,
@@ -11,7 +11,7 @@ data class City(
     val country: String
 )
 
-fun NetworkCity.asExternalModel(): City {
+fun CityNetwork.asExternalModel(): City {
     return City(
         id = 0,
         name = name,

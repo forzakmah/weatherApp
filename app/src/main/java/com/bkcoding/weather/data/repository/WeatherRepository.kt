@@ -1,7 +1,7 @@
 package com.bkcoding.weather.data.repository
 
 import com.bkcoding.core.network.httpclient.NetworkResult
-import com.bkcoding.core.network.model.NetworkCity
+import com.bkcoding.core.network.model.CityNetwork
 import com.bkcoding.core.network.model.WeatherInfoNetwork
 import com.bkcoding.core.network.weatherApi.WeatherAppApi
 import com.bkcoding.weather.data.model.WeatherInfoModel
@@ -15,7 +15,7 @@ interface IWeatherRepository {
     suspend fun searchCity(
         query: String,
         limit: Int = 5,
-    ): NetworkResult<List<NetworkCity>>
+    ): NetworkResult<List<CityNetwork>>
 
     suspend fun weatherByCity(
         query: String,
@@ -41,12 +41,12 @@ class WeatherRepository(
      * Search cities from the network using the passed query
      * @param query [String] city name to search
      * @param limit [Int] number of items to return in the response
-     * @return [NetworkResult]<[List]<[NetworkCity]>>
+     * @return [NetworkResult]<[List]<[CityNetwork]>>
      */
     override suspend fun searchCity(
         query: String,
         limit: Int
-    ): NetworkResult<List<NetworkCity>> {
+    ): NetworkResult<List<CityNetwork>> {
         return api.searchCity(query = query, limit = limit)
     }
 

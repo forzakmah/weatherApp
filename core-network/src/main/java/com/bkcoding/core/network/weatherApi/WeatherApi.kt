@@ -3,7 +3,7 @@ package com.bkcoding.core.network.weatherApi
 import com.bkcoding.core.network.BuildConfig
 import com.bkcoding.core.network.httpclient.HttpClient
 import com.bkcoding.core.network.httpclient.NetworkResult
-import com.bkcoding.core.network.model.NetworkCity
+import com.bkcoding.core.network.model.CityNetwork
 import com.bkcoding.core.network.model.WeatherInfoNetwork
 
 interface WeatherAppApi {
@@ -16,7 +16,7 @@ interface WeatherAppApi {
     suspend fun searchCity(
         query: String,
         limit: Int = 5,
-    ): NetworkResult<List<NetworkCity>>
+    ): NetworkResult<List<CityNetwork>>
 }
 
 class WeatherApiImpl : WeatherAppApi {
@@ -39,8 +39,8 @@ class WeatherApiImpl : WeatherAppApi {
     override suspend fun searchCity(
         query: String,
         limit: Int
-    ): NetworkResult<List<NetworkCity>> {
-        return httpClient.get<List<NetworkCity>>(
+    ): NetworkResult<List<CityNetwork>> {
+        return httpClient.get<List<CityNetwork>>(
             url = ApiHelper.searchCityEndpoint(
                 query = query,
                 limit = limit
