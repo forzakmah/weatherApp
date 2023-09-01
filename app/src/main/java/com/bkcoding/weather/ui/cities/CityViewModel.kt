@@ -26,8 +26,14 @@ import kotlinx.coroutines.launch
 class CityViewModel(
     private val weatherRepository: WeatherRepository
 ) : ViewModel() {
+    /**
+     * the input of the user when he is searching for a city
+     */
     var query by mutableStateOf("")
 
+    /**
+     * To indicate if the searchBar of the cities is active
+     */
     var active by mutableStateOf(false)
 
     val savedCities = weatherRepository.fetchWeathersInfo()
@@ -37,9 +43,15 @@ class CityViewModel(
             emptyList()
         )
 
+    /**
+     * The cities response
+     */
     private val _suggestedCity = MutableStateFlow<SuggestedCity>(SuggestedCity.Loading)
     val suggestedCity = _suggestedCity.asStateFlow()
 
+    /**
+     * Create snapshot flow that observe a change to the state query
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     val suggestions = snapshotFlow { query }
         .filter { query.length >= 3 }
